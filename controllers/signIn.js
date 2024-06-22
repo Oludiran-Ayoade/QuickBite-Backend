@@ -1,13 +1,13 @@
 const userModel = require('../model/userModel');
 const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose');
+// const mongoose = require('mongoose');
 
 const signin = async (req, res) => {
   try {
-    // Ensure MongoDB is connected
-    if (mongoose.connection.readyState !== 1) {
-      return res.status(500).send({ status: false, message: "Internal Server Error: MongoDB not connected" });
-    }
+   
+    // if (mongoose.connection.readyState !== 1) {
+    //   return res.status(500).send({ status: false, message: "Internal Server Error: MongoDB not connected" });
+    // }
 
     // Extract email and password from the request body
     const { email, password } = req.body;
