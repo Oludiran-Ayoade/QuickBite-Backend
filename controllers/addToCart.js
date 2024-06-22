@@ -5,14 +5,15 @@ const Cart = require('../model/cartModel');
 
 const addToCart = async (req, res) => {
   const { productId, quantity, userId } = req.body;
-//   const userId = req.headers['x-user-id'];
 
   try {
-    // Check if userId, productId, or quantity is missing
-    if (!userId || !productId || quantity === undefined) {
-      return res.status(400).json({ error: 'User ID, Product ID, or Quantity missing in request' });
+    if (!userId ) {
+      res.status(404).json({message: 'Sign in to add to cart'});
     }
-
+    // Check if userId, productId, or quantity is missing
+    if ( !productId || quantity === undefined) {
+      return res.status(400).json({ error: 'Product ID, or Quantity missing in request' });
+    }
     // Fetch user
     const user = await User.findById(userId);
 
@@ -27,7 +28,10 @@ const addToCart = async (req, res) => {
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
     }
-
+    // Check if sufficient stock is available
+    if (product.stock < quantity) {
+      return res.status(400).json({ error: 'Insufficient stock' });
+    }
     // Fetch or create user's cart
     let cart = await Cart.findOne({ user: userId });
 
@@ -44,6 +48,10 @@ const addToCart = async (req, res) => {
       // If the product is not in cart, add it to the cart
       cart.items.push({ product: new mongoose.Types.ObjectId(productId), quantity });
     }
+
+    // Decrement product stock
+    product.stock -= quantity;
+    await product.save();
 
     await cart.save();
     res.status(200).json({ message: 'Product added to cart successfully' });
